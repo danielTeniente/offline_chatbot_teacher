@@ -1,0 +1,57 @@
+Estructure of the Project
+tecni_zip_chat/
+│
+├── app/                            # Core chatbot logic and utilities
+│   ├── __init__.py                 # Marks this directory as a Python package
+│
+│   ├── model.py                    # [LLM Integration]
+│       └── cargar_modelo(ruta)     # Loads the Llama model from a file path
+│       └── generar_respuesta(...)  # Generates a response from the model using a prompt
+│
+│   ├── prompt.py                   # [Prompt Construction]
+│       └── construir_prompt(historial, user_input, rol)   # Builds a prompt using conversation history and a role
+│       └── limpiar_respuesta(...)  # Cleans up the model's raw output
+│
+│   ├── utils.py                    # [Helper Functions]
+│       └── contar_palabras(...)    # Counts the number of words in a string
+|
+│   ├── widgets/                     # Custom Tkinter widgets
+│   │   ├── send_button.py          # Widget for the send button
+|   |       └── create_send_button(...)    # Function to create a styled send button
+|   |   ├── role_selector.py       # Widget for role selection dropdown
+|   |       └── create_role_selector(parent: tk.Misc, variable: tk.StringVar, options: list[str]) -> tk.OptionMenu
+│   ├── data/
+│   │   ├── roles.py              # Predefined roles for the chatbot
+│   │       └── List of roles
+│
+├── cli/                            # User interfaces (console and GUI)
+│   ├── main.py                     # [Console Interface]
+│       └── Runs the chatbot in terminal mode
+│
+│   ├── gui.py                      # [Graphical Interface]
+│       └── Tkinter-based GUI for interacting with the chatbot
+|
+|── common/                         # Shared types and utilities
+|   ├── __init__.py                 # Marks this directory as a Python package
+|   ├── types.py                    # [Shared Type Definitions]
+|       └── BookMetadata            # TypedDict for book metadata (name, path, has_selectable_text)
+|       └── Turno                   # TypedDict for a conversation turn (user + response)
+|
+├── document_ingestion/            # Document ingestion and processing
+│   ├── __init__.py                 # Marks this directory as a Python package
+│   ├── file_selector.py            # [File Discovery]
+│   │   └── discover_books(folder_path)  # Scans a directory for PDF files and returns metadata
+│   ├── pdf_utils.py                # [PDF Text Extraction]
+│   │   └── extract_text_from_pdf(path)  # Extracts text from a PDF file
+│
+├── tests/                          # Unit tests for each module
+│   ├── test_model.py               # Tests for model loading and response generation
+│   ├── test_prompt.py              # Tests for prompt construction and cleaning
+|   |   └── test_construir_prompt() # Tests prompt construction
+|   |   └── test_construir_prompt_con_rol()  # Tests prompt construction with role
+|   |   └── test_limpiar_respuesta()         # Tests response cleaning
+│   ├── test_utils.py               # Tests for utility functions
+│   ├── test_send_button.py         # Tests for button widget creation
+│
+├── requirements.txt                # Python dependencies
+└── README.md                       # Project overview and usage instructions

@@ -2,7 +2,7 @@
 from app.utils import contar_palabras
 from app.prompt import construir_prompt, limpiar_respuesta
 from app.model import cargar_modelo, generar_respuesta
-from app.types import Turno
+from common.types import Turno
 
 def main():
     print("💻 Bienvenido a TecniZip Chat (modo consola)")

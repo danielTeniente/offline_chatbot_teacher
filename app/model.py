@@ -5,5 +5,5 @@ def cargar_modelo(ruta: str) -> Any:
     return Llama(model_path=ruta)
 
 def generar_respuesta(llm: Any, prompt: str) -> str:
-    resultado = llm(prompt, max_tokens=200, temperature=0.5)
+    resultado = llm(prompt, max_tokens=200, temperature=0.6)
     return resultado["choices"][0]["text"]

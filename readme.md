@@ -1,3 +1,4 @@
+Estructure of the Project
 tecni_zip_chat/
 │
 ├── app/                            # Core chatbot logic and utilities
@@ -8,7 +9,7 @@ tecni_zip_chat/
 │   │   └── generar_respuesta(...)  # Generates a response from the model using a prompt
 │
 │   ├── prompt.py                   # [Prompt Construction]
-│   │   └── construir_prompt(...)   # Builds a prompt using conversation history
+│   │   └── construir_prompt(historial, user_input, rol)   # Builds a prompt using conversation history and a role
 │   │   └── limpiar_respuesta(...)  # Cleans up the model's raw output
 │
 │   ├── utils.py                    # [Helper Functions]
@@ -16,6 +17,10 @@ tecni_zip_chat/
 │
 │   ├── types.py                    # [Type Definitions]
 │   │   └── Turno                   # TypedDict for a conversation turn (user + response)
+│
+│   |── widgets/                     # Custom Tkinter widgets
+│   │   └── send_button.py          # Widget for the send button
+|   |   └── create_send_button(...)    # Function to create a styled send button
 │
 ├── cli/                            # User interfaces (console and GUI)
 │   ├── main.py                     # [Console Interface]
@@ -28,6 +33,7 @@ tecni_zip_chat/
 │   ├── test_model.py               # Tests for model loading and response generation
 │   ├── test_prompt.py              # Tests for prompt construction and cleaning
 │   ├── test_utils.py               # Tests for utility functions
+│   ├── test_send_button.py         # Tests for button widget creation
 │
 ├── requirements.txt                # Python dependencies
 └── README.md                       # Project overview and usage instructions

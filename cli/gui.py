@@ -6,6 +6,7 @@ from app.prompt import construir_prompt, limpiar_respuesta
 from app.utils import contar_palabras
 from app.types import Turno
 from app.interface import mostrar_mensaje, actualizar_respuesta
+from app.widgets.send_button import create_send_button
 
 class ChatbotGUI:
     def __init__(self, root: tk.Tk):
@@ -30,16 +31,7 @@ class ChatbotGUI:
         self.entry.bind("<Return>", self.enviar_mensaje_evento)
         self.entry.bind("<Shift-Return>", lambda e: None)  # Permitir salto de línea con Shift+Enter
 
-        self.send_button = tk.Button(
-            input_frame,
-            text="➡️",
-            command=self.enviar_mensaje,
-            bg="#4CAF50",
-            fg="white",
-            font=("Arial", 12, "bold"),
-            width=4,
-            height=2
-        )
+        self.send_button = create_send_button(input_frame, self.enviar_mensaje)
         self.send_button.pack(side=tk.RIGHT, padx=(5, 0))
 
         mostrar_mensaje(self.chat_area, "Profesor 24/7", "👋 ¡Hola! Soy tu profesor disponible 24/7. Estoy aquí para ayudarte a aprender. ¿Qué quieres saber hoy?")

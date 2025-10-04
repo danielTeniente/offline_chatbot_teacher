@@ -35,21 +35,36 @@ if submitted and user_input.strip():
     contexto = st.session_state.historial[-2:] if len(st.session_state.historial) >= 2 else st.session_state.historial
 
     # Construir prompt con contexto
-    #prompt = "Eres TecniZip, un asistente técnico simpático en español. Sólo puedes hablar de temas tecnológicos."
-    prompt = "Eres TecniZip, un profesor amable de matemáticas que habla español. No puedes hablar de otros temas.\n"
+    # prompt = "Eres TecniZip, un asistente técnico simpático en español. Sólo puedes hablar de temas tecnológicos."
+    # prompt = "Eres TecniZip, un profesor amable de matemáticas que habla español. No puedes hablar de otros temas.\n"
+    prompt = "Eres TecniZip, un profesor de economía. No puedes hablar de otros temas.\n"
+
     for turno in contexto:
         prompt += f"Usuario: {turno['usuario']}\nTecniZip: {turno['respuesta']}\n"
     prompt += f"Usuario: {user_input}\nTecniZip:"
 
-    # Llamada al modelo
-    respuesta_modelo = llm(prompt, max_tokens=200, temperature=0.3)
-    respuesta_texto = respuesta_modelo["choices"][0]["text"].strip()
+    try:
+        respuesta_modelo = llm(prompt, max_tokens=200, temperature=0.5)
+        respuesta_texto = respuesta_modelo["choices"][0]["text"].strip()
 
-    # Guardar en historial
-    st.session_state.historial.append({
-        "usuario": user_input,
-        "respuesta": respuesta_texto
-    })
+        # clean up response 
+        # <|assistant|> is an hallucination if appears that should be removed
+        # with the text that follows it
+        if "Usuario:" in respuesta_texto:
+            respuesta_texto = respuesta_texto.split("Usuario:")[0].strip()
+
+        st.session_state.historial.append({
+            "usuario": user_input,
+            "respuesta": respuesta_texto
+        })
+
+    except Exception as e:
+        # Detecta si es por contexto excedido
+        if "exceed context window" in str(e):
+            st.warning("Se excedió la ventana de contexto. Se borrará el historial.")
+            st.session_state.historial = []  # borra historial
+        else:
+            st.error(f"Error: {e}")
 
 # --- MOSTRAR HISTORIAL ---
 for turno in st.session_state.historial:

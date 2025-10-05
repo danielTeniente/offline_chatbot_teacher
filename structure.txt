@@ -20,6 +20,8 @@ tecni_zip_chat/
 |   |       └── create_send_button(...)    # Function to create a styled send button
 |   |   ├── role_selector.py       # Widget for role selection dropdown
 |   |       └── create_role_selector(parent: tk.Misc, variable: tk.StringVar, options: list[str]) -> tk.OptionMenu
+|   |   ├── pdf_selector.py        # Widget for selecting a PDF from a folder
+|   |       └── create_pdf_selector(parent, pdfs: list[str], on_select: Callable[[str], None]) -> tuple[tk.Frame, tk.StringVar]
 │   ├── data/
 │   │   ├── roles.py              # Predefined roles for the chatbot
 │   │       └── List of roles
@@ -28,8 +30,16 @@ tecni_zip_chat/
 │   ├── main.py                     # [Console Interface]
 │       └── Runs the chatbot in terminal mode
 │
+├── cli/
 │   ├── gui.py                      # [Graphical Interface]
-│       └── Tkinter-based GUI for interacting with the chatbot
+│       └── class ChatbotGUI
+│           └── __init__                     # Initializes the GUI layout, widgets, and model
+│           └── enviar_mensaje_evento        # Handles Enter key to trigger message sending
+│           └── enviar_mensaje               # Sends user input to the model and updates the chat
+│           └── generar_y_mostrar_respuesta  # Generates model response and updates the chat area
+│           └── on_book_path_change          # Updates the book path when user selects a new folder
+│
+│       └── main                             # Launches the GUI application
 |
 |── common/                         # Shared types and utilities
 |   ├── __init__.py                 # Marks this directory as a Python package
@@ -40,9 +50,26 @@ tecni_zip_chat/
 ├── document_ingestion/            # Document ingestion and processing
 │   ├── __init__.py                 # Marks this directory as a Python package
 │   ├── file_selector.py            # [File Discovery]
-│   │   └── discover_books(folder_path)  # Scans a directory for PDF files and returns metadata
+│       └── discover_books(folder_path: str) -> dict[str, BookMetadata]  # Scans a directory for PDF files and returns metadata
+│
 │   ├── pdf_utils.py                # [PDF Text Extraction]
-│   │   └── extract_text_from_pdf(path)  # Extracts text from a PDF file
+│   │   ├── get_dirs(path)          # Returns a list of directories in the specified path.
+│   │   ├── get_PDFs(path)          # Returns a list of PDF file paths in the specified directory.
+│   │   ├── get_PDF_numPages(path)  # Returns the number of pages in a given PDF file.
+│   │   ├── get_book_name(book_path) # Extracts the book name from a PDF file path (removes the .pdf extension).
+│   │   ├── get_PDF_content(path, page) # Extracts and returns the text content from a specific page of a PDF.
+│   │   ├── has_selectable_text(path)   # Checks if the first page of a PDF contains selectable (extractable) text.
+│   │   ├── write_text(content, path, name) # Writes the given content to a text file in the specified directory.
+│   │   ├── get_paragraph(phrase, text) # Searches for a phrase in the text and returns surrounding paragraph-like context.
+│   │   └── scan_book(path, phrase) # Scans all pages of a PDF for a specific phrase and returns contextual matches with page numbers.
+│
+│   ├── ocr_utils.py                  # [OCR and Image Processing]
+│   │   ├── sanitize_name(name)       # Cleans a string to be filesystem-safe.
+│   │   ├── there_are_imgs(path)      # Checks if images for the book already exist.
+│   │   ├── create_book_images(path)  # Converts PDF pages to images.
+│   │   ├── mark_region(image_path)   # Detects text regions in an image.
+│   │   ├── ocr_img(img_path)         # Extracts text from image using OCR.
+│   │   └── scan_book_with_OCR(path, phrase) # Scans book and searches for phrase.
 │
 ├── tests/                          # Unit tests for each module
 │   ├── test_model.py               # Tests for model loading and response generation

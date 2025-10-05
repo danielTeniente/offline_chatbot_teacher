@@ -26,26 +26,30 @@ tecni_zip_chat/
 │   │   ├── roles.py              # Predefined roles for the chatbot
 │   │       └── List of roles
 │
-├── cli/                            # User interfaces (console and GUI)
-│   ├── main.py                     # [Console Interface]
-│       └── Runs the chatbot in terminal mode
-│
 ├── cli/
-│   ├── gui.py                      # [Graphical Interface]
-│       └── class ChatbotGUI
-│           └── __init__                     # Initializes the GUI layout, widgets, and model
-│           └── enviar_mensaje_evento        # Handles Enter key to trigger message sending
-│           └── enviar_mensaje               # Sends user input to the model and updates the chat
-│           └── generar_y_mostrar_respuesta  # Generates model response and updates the chat area
-│           └── on_book_path_change          # Updates the book path when user selects a new folder
-│
-│       └── main                             # Launches the GUI application
+│   ├── gui_main.py                  # [Main GUI Launcher]
+│   │   └── main()                   # Initializes the main window and adds chatbot and PDF panels
+│   │
+│   ├── chatbot_panel.py            # [Chatbot Panel]
+│   │   └── class ChatbotPanel
+│   │       └── __init__                     # Sets up chat area, input box, role selector, and model
+│   │       └── enviar_mensaje_evento        # Handles Enter key to trigger message sending
+│   │       └── enviar_mensaje               # Sends user input to the model and updates the chat
+│   │       └── generar_y_mostrar_respuesta  # Generates model response and updates the chat area
+│   │   └── create_chatbot_panel(...)        # Returns the chatbot panel frame
+│   │
+│   ├── pdf_panel.py                # [PDF Functionality Panel]
+│   │   └── class PDFPanel
+│   │       └── __init__                     # Sets up folder selector and PDF dropdown
+│   │       └── on_book_path_change          # Updates book metadata when folder changes
+│   │       └── on_pdf_selected_event        # Updates selected PDF path
+│   │   └── create_pdf_panel(...)            # Returns the PDF panel frame
 |
 |── common/                         # Shared types and utilities
 |   ├── __init__.py                 # Marks this directory as a Python package
 |   ├── types.py                    # [Shared Type Definitions]
-|       └── BookMetadata            # TypedDict for book metadata (name, path, has_selectable_text)
-|       └── Turno                   # TypedDict for a conversation turn (user + response)
+|   │   └── BookMetadata            # TypedDict for book metadata (name, path, has_selectable_text)
+|   │   └── Turno                   # TypedDict for a conversation turn (user + response)
 |
 ├── document_ingestion/            # Document ingestion and processing
 │   ├── __init__.py                 # Marks this directory as a Python package
@@ -67,9 +71,9 @@ tecni_zip_chat/
 │   │   ├── sanitize_name(name)       # Cleans a string to be filesystem-safe.
 │   │   ├── there_are_imgs(path)      # Checks if images for the book already exist.
 │   │   ├── create_book_images(path)  # Converts PDF pages to images.
-│   │   ├── mark_region(image_path)   # Detects text regions in an image.
-│   │   ├── ocr_img(img_path)         # Extracts text from image using OCR.
-│   │   └── scan_book_with_OCR(path, phrase) # Scans book and searches for phrase.
+│   │   ├── mark_region(image_path)   # Detects text regions in an image. If none found, returns an empty list.
+│   │   ├── ocr_img(img_path)         # Extracts text from image using OCR. If error returns an error message.
+│   │   └── def process_pdf_for_llm(path: str) -> str # Processes a PDF using OCR, chunks the text, generates embeddings, and stores them in JSON files for LLM use.
 │
 ├── tests/                          # Unit tests for each module
 │   ├── test_model.py               # Tests for model loading and response generation

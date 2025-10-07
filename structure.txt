@@ -7,6 +7,7 @@ tecni_zip_chat/
 │   ├── model.py                    # [LLM Integration]
 │       └── cargar_modelo(ruta)     # Loads the Llama model from a file path
 │       └── generar_respuesta(...)  # Generates a response from the model using a prompt
+|       └── generate_summary_book(llm: Any, file_path: str) -> str # Generates a summary of the book at file_path using the provided LLM
 │
 │   ├── prompt.py                   # [Prompt Construction]
 │       └── construir_prompt(historial, user_input, rol)   # Builds a prompt using conversation history and a role
@@ -74,6 +75,10 @@ tecni_zip_chat/
 │   │   ├── mark_region(image_path)   # Detects text regions in an image. If none found, returns an empty list.
 │   │   ├── ocr_img(img_path)         # Extracts text from image using OCR. If error returns an error message.
 │   │   └── def process_pdf_for_llm(path: str) -> str # Processes a PDF using OCR, chunks the text, generates embeddings, and stores them in JSON files for LLM use.
+│
+│   ├── summarizer_utils.py           # [Text Summarization and Embedding]
+│       └── load_chunks_and_embeddings(book_folder: str) -> tuple[list[str], np.ndarray] # Loads text chunks and their embeddings from JSON files.
+│       └── summarize_book(path: str) -> str # It makes a k means clustering of the embeddings and selects representative chunks to create a summary.
 │
 ├── tests/                          # Unit tests for each module
 │   ├── test_model.py               # Tests for model loading and response generation

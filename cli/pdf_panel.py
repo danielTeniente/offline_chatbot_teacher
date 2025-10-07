@@ -1,6 +1,9 @@
 import tkinter as tk
+from tkinter import messagebox, Toplevel, Label
+from typing import Optional, cast
+from document_ingestion.summarizer_utils import summarize_book
 from tkinter import ttk, messagebox, Toplevel, Label
-from typing import Dict, List, Optional, cast
+from typing import Dict, List, Optional, cast, Any
 from app.widgets.book_path_selector import create_book_path_selector
 from app.widgets.send_button import create_send_button
 from document_ingestion.file_selector import discover_books
@@ -12,10 +15,10 @@ from common.types import BookMetadata
 
 
 class PDFPanel:
-    def __init__(self, parent: tk.Misc, width: int):
+    def __init__(self, parent: tk.Misc, width: int, shared_state: Dict[str, Any]):
         
         self.parent_window = parent  # Store the parent window
-
+        self.shared_state = shared_state
         self.frame = tk.Frame(parent, width=width)
 
         self.book_path_var: tk.StringVar
@@ -47,6 +50,19 @@ class PDFPanel:
         
         self.simple_read_button: Optional[tk.Button] = None
         self.smart_read_button: Optional[tk.Button] = None
+
+        
+        self.summary_button: Optional[tk.Button] = create_send_button(
+            parent=self.frame,
+            command=self.on_summary_click,
+            text="Resumen",
+            width=14,
+            height=2,
+            font=("Arial", 10, "bold")
+        )
+        self.summary_button.pack(pady=(2, 10))
+        self.summary_button.config(state="disabled")  # Initially disabled
+
 
 
     def on_book_path_change(self, new_path: str):
@@ -84,6 +100,9 @@ class PDFPanel:
 
         if analyzed:
             messagebox.showinfo("Estado del análisis", "Este libro ya fue analizado.")
+            
+            if self.summary_button is not None:
+                self.summary_button.config(state="normal")
             return
 
         # Remove previous buttons if they exist (optional cleanup)
@@ -181,8 +200,6 @@ class PDFPanel:
                 self.smart_read_button.config(state="normal")
             self.analyzer_button.config(state="normal")
 
-
-
     def on_smart_read_click(self) -> None:
         """
         Handler for the 'Lectura inteligente' button.
@@ -191,7 +208,51 @@ class PDFPanel:
         messagebox.showinfo("Lectura inteligente", "Esta funcionalidad está en desarrollo. ¡Pronto estará disponible!")
 
 
+    def on_summary_click(self) -> None:
+        """
+        Handler for the 'Resumen' button.
+        Displays a temporary 'processing' window while generating the summary.
+        Shows the result message returned by summarize_book.
+        """
+        if not self.selected_book_path:
+            messagebox.showwarning("Advertencia", "No se ha seleccionado ningún libro.")
+            return
 
-def create_pdf_panel(parent: tk.Misc, width: int) -> tk.Frame:
-    panel = PDFPanel(parent, width)
+        # Disable buttons during processing
+        if self.summary_button is not None:
+            self.summary_button.config(state="disabled")
+        self.frame.update_idletasks()
+
+        # Show processing window
+        loading_window = Toplevel(self.frame)
+        loading_window.title("Procesando")
+        loading_window.geometry("250x100")
+        loading_window.transient(cast(tk.Toplevel, self.parent_window))
+        loading_window.grab_set()
+        Label(loading_window, text="Generando el resumen...\nPor favor espera.", font=("Arial", 10)).pack(expand=True, pady=20)
+        loading_window.update()
+
+        try:
+            # Call the summarization function and get the result message
+            result_message: str = summarize_book(self.selected_book_path)
+            loading_window.destroy()
+
+            # Show result to the user
+            messagebox.showinfo("Resumen generado", result_message)
+            # Update shared state to indicate the book has been summarized
+            self.shared_state["book_summarized"] = True
+            self.shared_state["summarized_book_path"] = self.selected_book_path
+            print(self.shared_state)
+            
+        except Exception as e:
+            loading_window.destroy()
+            messagebox.showerror("Error al resumir", f"No se pudo generar el resumen.\nDetalles: {str(e)}")
+        finally:
+            # Re-enable the summary button
+            if self.summary_button is not None:
+                self.summary_button.config(state="normal")
+
+
+def create_pdf_panel(parent: tk.Misc, width: int, shared_state: Dict[str, Any]) -> tk.Frame:
+    panel = PDFPanel(parent, width, shared_state)
     return panel.frame

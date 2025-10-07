@@ -1,9 +1,9 @@
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
 from threading import Thread
-from typing import List
+from typing import List, Dict, Any
 from app.data.roles import roles
-from app.model import cargar_modelo, generar_respuesta
+from app.model import cargar_modelo, generar_respuesta, generate_summary_book
 from app.prompt import construir_prompt, limpiar_respuesta
 from app.utils import contar_palabras
 from app.interface import mostrar_mensaje, actualizar_respuesta
@@ -12,8 +12,13 @@ from app.widgets.role_selector import create_role_selector
 from common.types import Turno
 
 class ChatbotPanel:
-    def __init__(self, parent: tk.Misc, width: int):
+    def __init__(self, parent: tk.Misc, width: int, shared_state: Dict[str, Any]):
         self.frame = tk.Frame(parent, width=width)
+        self.shared_state = shared_state
+        
+        self.previous_book_summarized = False
+        self.frame.after(1000, self.check_book_summarized_state)
+
         self.historial: List[Turno] = []
         self.llm = cargar_modelo("./Phi-3-mini-4k-instruct-q4.gguf")
 
@@ -87,6 +92,34 @@ class ChatbotPanel:
                 messagebox.showerror("Error", str(e))
                 actualizar_respuesta(self.chat_area, "❌ Hubo un error al generar la respuesta.")
 
-def create_chatbot_panel(parent: tk.Misc, width: int) -> tk.Frame:
-    panel = ChatbotPanel(parent, width)
+
+    def check_book_summarized_state(self):
+        current_state = self.shared_state.get("book_summarized", False)
+        if current_state and not self.previous_book_summarized:
+            self.previous_book_summarized = True
+            self.mostrar_resumen_libro()
+
+        elif not current_state:
+            self.previous_book_summarized = False
+
+        # Check again after 1 second
+        self.frame.after(1000, self.check_book_summarized_state)
+
+    def mostrar_resumen_libro(self):
+        mostrar_mensaje(self.chat_area, "Profesor 24/7", "📖 Leyendo el libro para generar el resumen...")
+
+        def generar_y_mostrar():
+            try:
+                resumen = generate_summary_book(self.llm, self.shared_state.get("summarized_book_path", ""))
+                mostrar_mensaje(self.chat_area, "Resumen del libro", resumen)
+            except Exception as e:
+                messagebox.showerror("Error al generar resumen", str(e))
+
+        # Run in a separate thread to avoid freezing the UI
+        Thread(target=generar_y_mostrar, daemon=True).start()
+
+    
+
+def create_chatbot_panel(parent: tk.Misc, width: int, shared_state: Dict[str, Any]) -> tk.Frame:
+    panel = ChatbotPanel(parent, width, shared_state)
     return panel.frame

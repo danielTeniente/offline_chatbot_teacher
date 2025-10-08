@@ -2,10 +2,13 @@
 from common.types import Turno
 
 def construir_prompt(historial: list[Turno], user_input: str, rol: str = "profesor de economía") -> str:
-    prompt = f"Eres un {rol}. No puedes hablar de otros temas.\n"
+    prompt = ""
     for turno in historial[-2:]:
-        prompt += f"Usuario: {turno['usuario']}\nProfesor 24/7: {turno['respuesta']}\n"
-    prompt += f"Usuario: {user_input}\nProfesor 24/7:"
+        prompt += f"{turno['respuesta']}\n"
+    # getting just last 500 characters from previous context to avoid exceeding context window
+    prompt = f"Context:{prompt[-500:]} \n"
+    prompt += f"You are a {rol}. Don't speak about other topics\n"
+    prompt += f"Usuario: {user_input}\nTeacher 24/7:"
     return prompt
 
 def limpiar_respuesta(texto: str) -> str:

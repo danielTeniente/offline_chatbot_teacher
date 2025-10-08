@@ -16,7 +16,7 @@ def extract_text_chunks_from_pdf(path: str, num_pages: int) -> List[str]:
     for page in range(num_pages):
         print(f"Procesando página {page + 1}/{num_pages}", end='\r')
         full_text += get_PDF_content(path, page) + '\n'
-    return chunk_text(full_text)
+    return chunk_text(full_text, max_length=200)
 
 
 def extract_text_chunks_from_ocr(path: str, book_name: str, num_pages: int, temp_img_folder: str) -> List[str]:
@@ -65,7 +65,7 @@ def process_pdf_for_llm(path: str, use_ocr: bool = False) -> str:
     book_name = get_book_name(path)
     sanitized_name = sanitize_name(book_name)
 
-    book_folder = os.path.join('document_ingestion', 'text_data', sanitized_name)
+    book_folder = os.path.join('text_data', sanitized_name)
     os.makedirs(book_folder, exist_ok=True)
 
     # Check if chunks already exist

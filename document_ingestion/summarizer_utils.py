@@ -17,13 +17,13 @@ def load_chunks_and_embeddings(book_folder: str) -> tuple[list[str], np.ndarray]
 
     return chunks, np.array(embeddings)
 
-def summarize_book(path: str) -> str:
-    book_name = sanitize_name(os.path.splitext(os.path.basename(path))[0])
-    book_folder = os.path.join('document_ingestion', 'text_data', book_name)
+def get_central_chunks(chunks_path: str) -> str:
+    book_folder = chunks_path
+    book_name = os.path.basename(book_folder)
 
     # if already summarized, skip
-    if os.path.exists(os.path.join(book_folder, 'summary.txt')):
-        return f"Book '{book_name}' is already summarized."
+    if os.path.exists(os.path.join(book_folder, 'central_chunks.txt')):
+        return os.path.join(book_folder, 'central_chunks.txt')
 
     if not os.path.exists(book_folder):
         return f"Book folder '{book_folder}' does not exist."
@@ -32,9 +32,9 @@ def summarize_book(path: str) -> str:
     num_chunks = len(chunks)
 
     if num_chunks == 0:
-        return "No chunks found to summarize."
+        return ""
 
-    num_clusters = min(max(num_chunks // 10, 1), 11)
+    num_clusters = min(max(num_chunks // 10, 1), 15)
 
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
     kmeans.fit(embeddings)
@@ -46,10 +46,10 @@ def summarize_book(path: str) -> str:
 
     summary_chunks = [chunks[i] for i in closest_indices]
 
-    summary_path = os.path.join(book_folder, 'summary.txt')
+    summary_path = os.path.join(book_folder, 'central_chunks.txt')
     with open(summary_path, 'w', encoding='utf-8') as f:
         for chunk in summary_chunks:
             f.write(chunk + "\n\n")
 
-    return f"Summary saved to '{summary_path}' with {len(summary_chunks)} chunks."
+    return summary_path
 

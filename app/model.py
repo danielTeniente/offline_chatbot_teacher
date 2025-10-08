@@ -4,13 +4,57 @@ import os
 from document_ingestion.ocr_utils import sanitize_name
 
 
-def cargar_modelo(ruta: str) -> Any:
-    return Llama(model_path=ruta, n_ctx=1024)
+def cargar_modelo(ruta: str, n_ctx = 1024) -> Any:
+    return Llama(model_path=ruta, n_ctx=n_ctx)
 
 def generar_respuesta(llm: Any, prompt: str, max_tokens: int = 200, temperature: float = 0.6) -> str:
     resultado = llm(prompt, max_tokens=max_tokens, temperature=temperature)
     return resultado["choices"][0]["text"]
 
+
+def interpret_book_ideas(
+    llm: Any,
+    prompt: str,
+    max_tokens: int = 200,
+    temperature: float = 0.6,
+    max_retries: int = 3
+) -> str:
+    """
+    Attempts to interpret book ideas using a language model.
+    If the input prompt exceeds token limits, retries by trimming the first 100 characters,
+    up to `max_retries` times.
+
+    Parameters:
+    - llm: The language model callable.
+    - prompt: The input prompt string.
+    - max_tokens: Maximum number of tokens for the response.
+    - temperature: Sampling temperature for the model.
+    - max_retries: Number of times to retry by trimming the prompt.
+
+    Returns:
+    - A string with the model's response or an error message if the context is too large.
+    """
+
+    def try_prompt(current_prompt: str) -> str:
+        """Helper function to call the model and handle errors."""
+        try:
+            result = llm(current_prompt, max_tokens=max_tokens, temperature=temperature)
+            return result["choices"][0]["text"]
+        except Exception as e:
+            if "token" in str(e).lower() or "length" in str(e).lower():
+                return ""  # Signal to retry
+            return f"Unexpected error: {e}"
+
+    for attempt in range(max_retries + 1):
+        response = try_prompt(prompt)
+        if response != "":
+            return response
+        # Trim the first 100 characters and retry
+        print(f"Attempt {attempt + 1}: Prompt too long, trimming and retrying...")
+        print(f"Current prompt length: {len(prompt)} characters")
+        prompt = prompt[1000:]
+
+    return "The context is too large to process. Please reduce the input size."
 
 def generate_summary_book(llm: Any, book_path: str) -> str:
     """Generates a summary for the book located at book_path using the provided LLM model.

@@ -1,8 +1,9 @@
 from typing import Any
 from llama_cpp import Llama
 import os
+import json
 from document_ingestion.ocr_utils import sanitize_name
-
+from document_ingestion.chunk_search import rank_chunks_by_similarity  # You’ll create this next
 
 def cargar_modelo(ruta: str, n_ctx = 1024) -> Any:
     return Llama(model_path=ruta, n_ctx=n_ctx)
@@ -80,3 +81,40 @@ def generate_summary_book(llm: Any, book_path: str) -> str:
         return "Error: No se encontró el archivo en la ruta especificada."
     except Exception as e:
         return f"Error al generar el resumen: {str(e)}"
+
+
+def answer_question_about_book(llm: Any, book_name: str, question: str) -> str:
+    """
+    Answers a question based on the most relevant chunks from a processed book.
+    """
+    book_path: str = os.path.join("text_data", book_name)
+
+    chunks: list[dict] = []
+
+    # Load all chunks with their embeddings
+    for file_name in sorted(os.listdir(book_path)):
+        if file_name.startswith("chunk_") and file_name.endswith(".json"):
+            with open(os.path.join(book_path, file_name), "r", encoding="utf-8") as f:
+                chunk_data = json.load(f)
+                if "text" in chunk_data and "vector" in chunk_data:
+                    chunks.append({
+                        "text": chunk_data["text"],
+                        "vector": chunk_data["vector"]
+                    })
+
+    # Rank chunks by relevance
+    top_chunks: list[str] = rank_chunks_by_similarity(question, chunks, top_k=3)
+
+    # Build prompt
+    context: str = "\n\n".join(top_chunks)
+    prompt: str = f"""Usa el siguiente contenido del libro para responder la pregunta del usuario.
+
+        Contenido relevante:
+        {context}
+
+        Pregunta del usuario:
+        {question}
+
+        Respuesta:"""
+
+    return generar_respuesta(llm, prompt, 350)

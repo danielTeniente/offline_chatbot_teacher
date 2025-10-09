@@ -59,3 +59,9 @@ A small command‑line interface that lets you:
 ## 🧪 Running Test
 python -m pytest --cov=apps
 
+## Next Steps
+* Improve PDF reading with OCR: currently, the app uses pypdf to extract text from PDFs.
+
+## Previous Work
+This project was built over a previous one called [pdfSearch](https://github.com/danielTeniente/pdfSearch) that was a simple GUI to search keywords in a book using regex and computer vision to improve text extraction from scanned PDFs.
+

@@ -18,9 +18,9 @@ It provides a **Tkinter-based GUI** for chatting, managing roles, and interactin
 
 ## Create and activate a virtual environment
 python -m venv .venv
-# On Windows:
+### On Windows:
 .venv\Scripts\activate
-# On macOS/Linux:
+### On macOS/Linux:
 source .venv/bin/activate
 
 ## Install dependencies
@@ -29,7 +29,8 @@ pip install -r requirements.txt
 ## Model 
 This project is designed to work offline using a local model such as Phi-3-mini-4k-instruct-q4 from Hugging Face.
 
-## Launch the application
+## Launch the application GUI
+The GUI interfacte is easy to use for chatbot experience, the PDF tools need some improvements.
 python -m cli.gui_main
 
 This opens a Tkinter window with two panels:
@@ -37,6 +38,18 @@ This opens a Tkinter window with two panels:
 Chatbot Panel: interact with the model, select roles, and send messages.
 
 PDF Panel: select a directory with PDFs, preview, and process them with OCR.
+
+## Launch the application CLI
+This is a simple command-line to use all the features of the app.
+python -m cli.main
+
+📚 LLM‑Powered Book Assistant CLI
+A small command‑line interface that lets you:
+
+* Chat with a large language model (LLM).
+* Generate chunks & embeddings from a PDF book (necessary for the next steps).
+* Sumarise the book using the generated chunks.
+* Ask questions about a processed book (Q&A).
 
 ## 🧾 OCR Setup (Tesseract)
 
